@@ -8,6 +8,8 @@ class MLPPage(BasePage):
     title = "MLP (Top-30)"
     slug = "mlp"
     icon = "🧠"
+    group = "models"
+    section = "모델"
 
     def render(self) -> None:
         inject_global_style()

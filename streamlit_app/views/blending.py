@@ -8,6 +8,8 @@ class BlendingPage(BasePage):
     title = "Blending (DNN 0.85 + LGBM 0.15)"
     slug = "blending"
     icon = "⚗️"
+    group = "models"
+    section = "모델"
 
     def render(self) -> None:
         inject_global_style()

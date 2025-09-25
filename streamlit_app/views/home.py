@@ -9,6 +9,8 @@ class HomePage(BasePage):
     title = "Home"
     slug = "home"
     icon = "🏠"
+    group = "home"
+    section = "홈"
 
     def render(self) -> None:
         inject_global_style()

@@ -1,38 +1,62 @@
 # streamlit_app/core/base.py
 from __future__ import annotations
 import streamlit as st
-from typing import Dict, Type, List, Optional
+from dataclasses import dataclass, field
+from typing import Type, Dict, List, Optional
+from streamlit_app.core.ui import inject_global_style, footer
+
+@dataclass
+class PageMeta:
+    title: str
+    slug: str
+    icon: str
+    group: str = "models"        # "home" | "eda" | "models"
+    section: str = "모델"         # models 그룹일 때: "모델" | "전처리" | "규제"
 
 class BasePage:
-    """모든 페이지가 상속할 베이스 클래스."""
+    # 서브클래스에서 오버라이드
     title: str = "Untitled"
     slug: str = "untitled"
-    icon: str = "📄"  # 사이드바 표시용
+    icon: str = "📄"
+    group: str = "models"     # 기본값: 모델 그룹
+    section: str = "모델"      # 기본값: 모델 섹션
+
+    def meta(self) -> PageMeta:
+        return PageMeta(
+            title=self.title, slug=self.slug, icon=self.icon,
+            group=self.group, section=self.section
+        )
 
     def render(self) -> None:
-        raise NotImplementedError("Each page must implement render().")
+        raise NotImplementedError
 
 class PageRegistry:
-    """페이지 클래스를 등록/조회하는 레지스트리."""
     _pages: Dict[str, Type[BasePage]] = {}
 
     @classmethod
-    def register(cls, page_cls: Type[BasePage]) -> None:
-        if not issubclass(page_cls, BasePage):
-            raise TypeError("Page must inherit from BasePage")
-        cls._pages[page_cls.slug] = page_cls
+    def register(cls, page_cls: Type[BasePage]):
+        slug = page_cls.slug
+        cls._pages[slug] = page_cls
+
+    @classmethod
+    def get(cls, slug: str) -> Type[BasePage]:
+        return cls._pages[slug]
 
     @classmethod
     def list(cls) -> List[Type[BasePage]]:
-        # 정렬: slug 순서 대신 title 알파벳/커스텀 정렬 가능
-        return sorted(cls._pages.values(), key=lambda c: c.title)
+        return list(cls._pages.values())
 
     @classmethod
-    def get(cls, slug: str) -> Optional[Type[BasePage]]:
-        return cls._pages.get(slug)
+    def list_by(cls, group: Optional[str] = None, section: Optional[str] = None) -> List[Type[BasePage]]:
+        pages = list(cls._pages.values())
+        if group:
+            pages = [p for p in pages if p.group == group]
+        if section:
+            pages = [p for p in pages if p.section == section]
+        # 홈/EDA는 섹션 정렬 불필요, 모델 그룹은 제목순 정렬
+        return sorted(pages, key=lambda p: (p.group, p.section, p.title))
 
 class App:
-    """사이드바 네비게이션 + 페이지 렌더링."""
     def __init__(self, project_title: str, repo_name: str):
         self.project_title = project_title
         self.repo_name = repo_name
@@ -43,20 +67,40 @@ class App:
             page_icon="📘",
             layout="wide",
         )
-        # 사이드바: 페이지 선택
-        pages = PageRegistry.list()
-        titles = [f"{p.icon} {p.title}" for p in pages]
-        slugs = [p.slug for p in pages]
-        default_idx = slugs.index("home") if "home" in slugs else 0
-        st.sidebar.title("📑 Pages")
-        choice = st.sidebar.selectbox("Go to", titles, index=default_idx)
-        slug = slugs[titles.index(choice)]
+        inject_global_style()
 
-        page_cls = PageRegistry.get(slug)
-        page = page_cls()  # 인스턴스화
-        page.render()
+        # 1) 최상위 그룹 선택
+        top_group = st.sidebar.radio("섹션", ["Home", "EDA", "모델", "결과"], index=0, horizontal=False)
 
-        # 전역 푸터
-        st.markdown("---")
-        st.caption(f"© 2025 우리만의 AI 교과서 · Repo: {self.repo_name}")
+        if top_group == "Home":
+            pages = PageRegistry.list_by(group="home")
+            page_cls = pages[0] if pages else None
+
+        elif top_group == "EDA":
+            pages = PageRegistry.list_by(group="eda")
+            # EDA는 페이지가 여러 개일 수 있으니 선택박스 제공
+            titles = [f"{p.icon} {p.title}" for p in pages]
+            idx = st.sidebar.selectbox("EDA 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
+            page_cls = pages[idx] if pages else None
+
+        elif top_group == "모델":  # "모델들"
+            sub = st.sidebar.radio("분류", ["모델", "전처리", "규제"], index=0)
+            pages = PageRegistry.list_by(group="models", section=sub)
+            titles = [f"{p.icon} {p.title}" for p in pages]
+            idx = st.sidebar.selectbox(f"{sub} 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
+            page_cls = pages[idx] if pages else None
+
+        else:
+            pages = PageRegistry.list_by(group='results')
+            titles = [f"{p.icon} {p.title}" for p in pages]
+            idx = st.sidebar.selectbox("결과 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
+            page_cls = pages[idx] if pages else None
+
+        if page_cls is None:
+            st.warning("표시할 페이지가 없습니다. 파일 임포트/등록을 확인해주세요.")
+        else:
+            page = page_cls()
+            page.render()
+
+        footer(self.repo_name)
 

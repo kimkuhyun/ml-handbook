@@ -8,6 +8,8 @@ class LightGBMPage(BasePage):
     title = "LightGBM"
     slug = "lightgbm"
     icon = "🌳"
+    group = "models"
+    section = "모델"
 
     def render(self) -> None:
         inject_global_style()

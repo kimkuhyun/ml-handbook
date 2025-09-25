@@ -8,6 +8,8 @@ class LDASVMPage(BasePage):
     title = "LDA → SVM (focus 0/3/9/15)"
     slug = "lda_svm"
     icon = "🎯"
+    group = "models"
+    section = "모델"
 
     def render(self) -> None:
         inject_global_style()
