@@ -38,7 +38,10 @@ class EDAFeaturesCorrPage(BasePage):
 | X_51 | 21693.0 | 0.491238 | 0.103482 | 0.000 | 0.450000 | 0.480000 | 0.520000 | 1.000 |
 | X_52 | 21693.0 | 0.505871 | 0.097134 | 0.000 | 0.470000 | 0.500000 | 0.540000 | 1.000 |
 
-### 피처 분포 시각화
+### 피처 분포 시각화""")
+        _img("2_feature_distribution_1_train_test_top6.png", "피처 분포 시각화", width=1000)
+        st.markdown("""
+
 - 대부분 0~1 값 → 정규화된 값  
 - 뾰족하게 몰린 분포 많음 → 정보량 적음  
 - 일부 넓거나 이산적인 분포 존재 → 모델에서 유용할 수 있음
@@ -54,23 +57,24 @@ class EDAFeaturesCorrPage(BasePage):
 3) **이산형 피처**: X_10, X_19, X_37, X_40 → 카테고리형 처리 고려  
 4) **분산 낮은 피처**: X_02 ~ X_08 → 단독 영향 적으나 조합 의미 가능
 """)
-        _img("2_feature_distribution_1_train_test_top6.png", "피처 분포 (상위 6개)", width=1000)
 
         st.markdown("""
 ## 상관관계 분석 (Correlation Analysis)
 
-### 전체 히트맵
+### 전체 히트맵""")
+        _img("3_feture_exploation.png", "피처 간 상관 히트맵", width=1000)
+        st.markdown("""
 - 대부분 상관 낮음  
 - 일부 피처는 중복 정보 존재 (다중공선성 가능)  
 - 타깃과 뚜렷한 상관 없음 → 단일 피처로는 한계
 
-### Target vs Feature 상관계수
+### Target vs Feature 상관계수""")
+        _img("4_feature_correlation.png", "Target vs Feature 상관", width=1000)
+        st.markdown("""
 - X_28, X_48: 음의 상관 (~ -0.3)  
 - X_33, X_19: 양의 상관 (~ +0.2)  
 - 전체적으로 절댓값 ≤ 0.3 → 단일 피처 예측력 낮음 → 트리/비선형 모델 필요
 """)
-        _img("3_feture_exploation.png", "피처 간 상관 히트맵", width=1000)
-        _img("4_feature_correlation.png", "Target vs Feature 상관", width=1000)
 
 PageRegistry.register(EDAFeaturesCorrPage)
 

@@ -67,11 +67,15 @@ class EDAQualityTargetPage(BasePage):
 ## 타겟 변수 분석 (Target Analysis)
 
 ### 타겟 분포 확인
-- 각 클래스가 **동일한 개수(1033개)**로 분포  
-- → **완전히 균형 잡힌 다중분류 데이터셋**  
+""")
+
+        _img("1_target_disturibution.png", "타겟 분포", width=1000)
+
+        st.markdown("""
+- 각 클래스가 **동일한 개수(1033개)**로 분포
+- → **완전히 균형 잡힌 다중분류 데이터셋**
 - 클래스 불균형 문제 고려 불필요
 """)
-        _img("1_target_disturibution.png", "타겟 분포", width=1000)
 
 PageRegistry.register(EDAQualityTargetPage)
 

@@ -25,13 +25,6 @@ class EDAOverviewPage(BasePage):
         st.title("📝 EDA (Exploratory Data Analysis)")
 
         st.markdown("""
-## 📑 목차
-1. 개요 (Overview)  
-   - 분석 목적  
-   - 데이터 소개  
-""")
-
-        st.markdown("""
 ## 개요 (Overview)
 
 ### 분석 목적
