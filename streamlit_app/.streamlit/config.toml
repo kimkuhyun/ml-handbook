@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#00008B"              # 라디오 선택점/포커스 등 액센트 컬러
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F6F6FA"
+textColor = "#000000"
+

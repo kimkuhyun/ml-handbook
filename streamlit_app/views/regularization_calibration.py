@@ -9,6 +9,7 @@ class RegCalibPage(BasePage):
     icon = "🌡️"
     group = "models"
     section = "규제"
+    order = 50
 
     def render(self) -> None:
         inject_global_style()

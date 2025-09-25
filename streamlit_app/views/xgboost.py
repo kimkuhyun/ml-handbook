@@ -9,6 +9,7 @@ class XGBPage(BasePage):
     icon = "⚡"
     group = "models"
     section = "모델"
+    order = 20
 
     def render(self) -> None:
         inject_global_style()
@@ -56,5 +57,13 @@ class XGBPage(BasePage):
             "- **OOF 스태킹**으로 로지스틱 메타 결합.\n"
         )
 
+        st.subheader("📚 참고: 실제 적용 논문")
+        card("""
+**XGBoost for Wireless Network Anomaly Classification**
+
+- 데이터: RSSI, 잡음, 에러율 등 무선 지표.
+- 결과: F1 0.95~1.00, 정확도 ~99%.
+- 의미: 네트워크/IoT 모니터링에 강력한 선택지.
+        """)
 PageRegistry.register(XGBPage)
 

@@ -6,13 +6,14 @@ from streamlit_app.core.ui import inject_global_style, badges, card
 class PreprocTop30Page(BasePage):
     title = "Top-30 특징 선택"
     slug = "preprocess_top30"
-    icon = "🧲"
+    icon = "🏷️"
     group = "models"
     section = "전처리"
+    order = 10
 
     def render(self) -> None:
         inject_global_style()
-        st.title("🧲Top-30 특징 선택")
+        st.title("🏷️ Top-30 특징 선택")
         badges(["Feature Selection", "속도↑", "잡음↓"])
 
         st.markdown("### 왜 했나?")

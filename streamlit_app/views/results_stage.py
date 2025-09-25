@@ -31,6 +31,7 @@ class ResultsStagePage(BasePage):
     icon = "🧩"
     group = "results"
     section = "stage"
+    order = 20
 
     def _stage1(self) -> pd.DataFrame:
         return pd.DataFrame([{

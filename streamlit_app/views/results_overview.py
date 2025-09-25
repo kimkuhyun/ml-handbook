@@ -29,6 +29,7 @@ class ResultsOverviewPage(BasePage):
     icon = "📊"
     group = "results"
     section = "overview"
+    order = 10
 
     @staticmethod
     def _summary() -> pd.DataFrame:

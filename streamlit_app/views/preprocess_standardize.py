@@ -7,13 +7,14 @@ from streamlit_app.core.ui import inject_global_style, badges, card
 class PreprocStandardizePage(BasePage):
     title = "표준화(StandardScaler)"
     slug = "preprocess_standardize"
-    icon = "🧴"
+    icon = "🎚️"
     group = "models"
     section = "전처리"
+    order = 20
 
     def render(self) -> None:
         inject_global_style()
-        st.title("🧴 표준화 (StandardScaler)")
+        st.title("🎚️ 표준화 (StandardScaler)")
         badges(["스케일 정규화", "선형/커널 민감", "필수"])
 
         st.markdown("### 왜 필요한가?")

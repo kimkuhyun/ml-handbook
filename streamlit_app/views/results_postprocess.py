@@ -15,6 +15,7 @@ class ResultsPostprocessPage(BasePage):
     icon = "🧩"
     group = "results"
     section = "postprocess"
+    order = 40
 
     def _ranking(self) -> pd.DataFrame:
         rows = [

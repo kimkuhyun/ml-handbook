@@ -10,6 +10,7 @@ class LightGBMPage(BasePage):
     icon = "🌳"
     group = "models"
     section = "모델"
+    order = 10
 
     def render(self) -> None:
         inject_global_style()
@@ -57,6 +58,17 @@ class LightGBMPage(BasePage):
 - **Top-30 특성**으로 재학습 비교  
 - **MLP와 블렌딩**으로 안정성↑  
 - Optuna로 자동 탐색
+        """)
+
+        st.subheader("📚 참고: 실제 적용 논문")
+        card("""
+**LightGBM for Industrial Sensor Anomaly Detection**
+
+- 논문 사례: 산업용 적층 제조(Additive Manufacturing) 시스템의 이상 진단.
+- 데이터: 압력, 모터 속도 등 다양한 센서 신호 → 통계적 특징 후 Softmax 융합.
+- 모델: 최적화 LightGBM(히스토그램, leaf-wise).
+- 결과: 정확도 99.7%(~+3%), 추론시간 ~30% 단축.
+- 의미: 일반 센서 특징만으로 빠르고 정확한 이상 감지.
         """)
 
 PageRegistry.register(LightGBMPage)

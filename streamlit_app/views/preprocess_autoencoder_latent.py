@@ -9,6 +9,7 @@ class PreprocAEPage(BasePage):
     icon = "🧬"
     group = "models"
     section = "전처리"
+    order = 60
 
     def render(self) -> None:
         inject_global_style()

@@ -18,6 +18,7 @@ class ResultsStackingVariantsPage(BasePage):
     icon = "🧱"
     group = "results"
     section = "stacking"
+    order = 30
 
     @staticmethod
     def _variants() -> pd.DataFrame:

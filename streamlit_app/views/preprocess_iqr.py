@@ -29,6 +29,7 @@ class PreprocessIQRPage(BasePage):
     icon = "🧹"
     group = "models"
     section = "전처리"
+    order = 30
 
     @staticmethod
     def _iqr_tbl() -> pd.DataFrame:

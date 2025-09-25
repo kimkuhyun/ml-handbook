@@ -1,6 +1,8 @@
 from __future__ import annotations
 import io
+import os
 import re
+import random
 from typing import List
 
 import altair as alt
@@ -12,6 +14,16 @@ from streamlit_app.core.ui import inject_global_style, badges
 
 DARK_BLUE = "#00008b"
 MAGENTA = "#ff00ff"
+
+# 샘플 CSV 경로(있으면 읽고, 없으면 코드로 생성)
+SAMPLE_DIR = "data/samples"
+SAMPLE_FILES = {
+    "LGBM": os.path.join(SAMPLE_DIR, "test_proba_lgbm.csv"),
+    "XGB" : os.path.join(SAMPLE_DIR, "test_proba_xgb.csv"),
+    "RF"  : os.path.join(SAMPLE_DIR, "test_proba_rf.csv"),
+    "SVC" : os.path.join(SAMPLE_DIR, "test_proba_svc.csv"),
+    "MLP" : os.path.join(SAMPLE_DIR, "test_proba_mlp.csv"),
+}
 
 def _detect_prob_cols(df: pd.DataFrame) -> List[str]:
     cols = [c for c in df.columns if re.fullmatch(r"\d+", str(c))]
@@ -76,6 +88,43 @@ def _bar_chart(df: pd.DataFrame, ymax: float, height: int = 320, x_order: List[s
     )
     return base + txt
 
+# ===== 샘플 데이터 로딩/생성 =====
+@st.cache_data(show_spinner=False)
+def _load_sample_csv(path: str) -> pd.DataFrame | None:
+    if os.path.exists(path):
+        try:
+            return pd.read_csv(path)
+        except Exception:
+            return None
+    return None
+
+def _make_synthetic_probs(n_rows: int = 200, n_classes: int = 21, seed: int = 42, peaked: bool = False) -> pd.DataFrame:
+    rnd = random.Random(seed)
+    classes = [str(i) for i in range(n_classes)]
+    rows = []
+    for _ in range(n_rows):
+        vals = [rnd.random() for _ in classes]
+        if peaked:
+            # 하나의 클래스에 살짝 가중치 부여 (피크형)
+            j = rnd.randrange(n_classes)
+            vals[j] *= 3.0
+        s = sum(vals) or 1.0
+        row = {c: v / s for c, v in zip(classes, vals)}
+        rows.append(row)
+    return pd.DataFrame(rows, columns=classes)
+
+@st.cache_data(show_spinner=False)
+def get_sample_dataframe(name: str) -> pd.DataFrame:
+    """이름으로 샘플 DF를 반환. 파일 있으면 읽고, 없으면 생성."""
+    path = SAMPLE_FILES.get(name, "")
+    df = _load_sample_csv(path)
+    if df is not None:
+        return df
+    # 파일이 없으면 즉석 생성
+    if "피크" in name:
+        return _make_synthetic_probs(seed=7, peaked=True)
+    return _make_synthetic_probs(seed=3, peaked=False)
+
 class PredictDistPage(BasePage):
     title = "예측 분포"
     slug = "predict-dist"
@@ -91,6 +140,16 @@ class PredictDistPage(BasePage):
 
         st.markdown("**CSV 형식**: 컬럼에 클래스 확률이 있어야 합니다. (예: `0..20` 또는 `target_0..target_20`)")
 
+        # ▶ 샘플 사용 옵션
+        use_samples = st.toggle("샘플 CSV 사용(업로드가 없으면 자동 사용)", value=True)
+        if use_samples:
+            selected_samples = st.multiselect(
+                "샘플 선택",
+                list(SAMPLE_FILES.keys()),
+                default=list(SAMPLE_FILES.keys()),
+            )
+
+        # 사용자 업로드
         files = st.file_uploader(
             "모델 확률 CSV 선택(최대 5개)",
             type=["csv"],
@@ -99,46 +158,59 @@ class PredictDistPage(BasePage):
 
         col_a, col_b = st.columns([1, 1])
         with col_a:
-            ymax = st.slider("Y축 최대(%)", min_value=5, max_value=20, value=10, step=2)
+            ymax = st.slider("Y축 최대(%)", min_value=5, max_value=30, value=12, step=1)
         with col_b:
-            chart_h = st.slider("차트 높이(px)", min_value=300, max_value=520, value=400, step=20)
+            chart_h = st.slider("차트 높이(px)", min_value=280, max_value=520, value=380, step=20)
 
         run = st.button("예측 분포 그리기", type="primary")
 
-        if not (run and files):
+        if not run:
             return
 
-        # 1) 모든 파일을 먼저 파싱해서 (이름, 분포DF) 리스트 생성
+        # ===== 1) 데이터 소스 구성: 업로드 우선, 없으면 샘플 =====
         dists: list[tuple[str, pd.DataFrame]] = []
-        for f in files:
-            try:
-                df = pd.read_csv(io.BytesIO(f.read()))
+
+        if files:
+            for f in files:
+                try:
+                    df = pd.read_csv(io.BytesIO(f.read()))
+                    dist = _dist_from_prob(df)
+                    dists.append((f.name, dist))
+                except Exception as e:
+                    st.error(f"{f.name}: 파싱 실패 - {e}")
+
+        if not dists and use_samples and selected_samples:
+            for name in selected_samples:
+                df = get_sample_dataframe(name)
                 dist = _dist_from_prob(df)
-                dists.append((f.name, dist))
-            except Exception as e:
-                st.error(f"{f.name}: 파싱 실패 - {e}")
+                dists.append((name, dist))
 
         if not dists:
+            st.warning("업로드 파일이 없고 샘플도 선택되지 않았습니다. 파일을 올리거나 샘플을 선택하세요.")
             return
 
-        # 2) 평균 분포 계산 (클래스 정렬은 숫자 우선)
+        # ===== 2) 평균 분포 계산 및 x순서 고정 =====
         all_classes = sorted({c for _, d in dists for c in d["class"].tolist()}, key=_class_sort_key)
         aligned = [d.set_index("class")["pct"] for _, d in dists]
         mean_series = pd.concat(aligned, axis=1).mean(axis=1)
         mean_df = mean_series.reindex(all_classes).reset_index()
         mean_df.columns = ["class", "pct"]
 
-        # 3) 각 탭에서: 바(해당 모델) + 평균 꺾은선(마젠타) 오버레이
+        # ===== 3) 각 탭에 바(해당 모델) + 평균 라인(마젠타) 오버레이 =====
         tabs = st.tabs([f"모델 {i+1}: {name}" for i, (name, _) in enumerate(dists)])
         for (name, dist), tab in zip(dists, tabs):
             with tab:
+                # 표는 expander로
                 show = dist.sort_values("class", key=lambda s: s.map(str))
                 with st.expander(f"📋 {name} 표 보기", expanded=False):
                     st.dataframe(show, hide_index=True, width="stretch")
 
-                # x 순서 고정(모든 모델 동일), y스케일 통일
-                bar = _bar_chart(dist.sort_values("class", key=lambda s: s.map(_class_sort_key)),
-                                 ymax=ymax, height=chart_h, x_order=all_classes)
+                bar = _bar_chart(
+                    dist.sort_values("class", key=lambda s: s.map(_class_sort_key)),
+                    ymax=ymax,
+                    height=chart_h,
+                    x_order=all_classes,
+                )
                 line = (
                     alt.Chart(mean_df)
                     .mark_line(color=MAGENTA, strokeWidth=2)
@@ -151,7 +223,7 @@ class PredictDistPage(BasePage):
                     .properties(height=chart_h)
                 )
 
-                st.altair_chart(bar + line)  # 가로폭은 컨테이너에 맞춤 (경고 피하려고 width 인자 미사용)
+                st.altair_chart(bar + line)  # width 인자 없이 컨테이너 폭 사용
 
 PageRegistry.register(PredictDistPage)
 

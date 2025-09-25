@@ -9,6 +9,7 @@ class RFPage(BasePage):
     icon = "🌲"
     group = "models"
     section = "모델"
+    order = 70
 
     def render(self) -> None:
         inject_global_style()

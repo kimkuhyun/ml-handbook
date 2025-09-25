@@ -4,6 +4,7 @@ import streamlit as st
 from datetime import datetime
 from streamlit_app.core.base import BasePage, PageRegistry
 from streamlit_app.core.ui import inject_global_style, badges, card, hint
+import graphviz
 
 class HomePage(BasePage):
     title = "Home"
@@ -126,6 +127,9 @@ class HomePage(BasePage):
 - 추천 순서: **MLP(Top-30)** → **LightGBM** → **Blending** → **LDA→SVM(포커스 0/3/9/15)**  
 - 각 페이지는 *모델 소개 → 왜 선택 → 전처리 → 하이퍼 → 결과 → 어려움 → 확장 아이디어* 순으로 구성되어 있습니다.
         """)
+
+        dot = open("docs/flow/dfd_das_dss_jps_wss.dot", "r", encoding="utf-8").read()
+        st.graphviz_chart(graphviz.Source(dot), height=560)  # width 옵션 없이 높이만 지정
 
 # 레지스트리 등록
 PageRegistry.register(HomePage)

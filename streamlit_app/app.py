@@ -25,7 +25,7 @@ import streamlit_app.views.knn          # noqa: F401
 import streamlit_app.views.catboost     # noqa: F401
 import streamlit_app.views.cascade      # noqa: F401
 import streamlit_app.views.xgboost      # noqa: F401
-import streamlit_app.views.eda                    # noqa: F401
+import streamlit_app.views.model_references
 # --- Preprocessing new pages ---
 import streamlit_app.views.preprocess_standardize # noqa: F401
 import streamlit_app.views.preprocess_feature_selection_top30  # noqa: F401
@@ -49,8 +49,14 @@ import streamlit_app.views.results_stage         # noqa: F401
 import streamlit_app.views.results_postprocess   # noqa: F401
 import streamlit_app.views.results_stacking_variants  # noqa: F401
 import streamlit_app.views.results_learning_curves    # noqa: F401
+import streamlit_app.views.results_submissions
 
 import streamlit_app.views.predict_dist
+
+import streamlit_app.views.eda_overview
+import streamlit_app.views.eda_quality_target
+import streamlit_app.views.eda_features_corr
+import streamlit_app.views.eda_shift_dim_outlier
 
 st.set_page_config(page_title="우리만의 AI 교과서 · Home", page_icon="📘", layout="wide")
 

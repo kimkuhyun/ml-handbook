@@ -3,36 +3,36 @@ import streamlit as st
 from streamlit_app.core.base import BasePage, PageRegistry
 from streamlit_app.core.ui import inject_global_style, badges, card
 
-class RegWD_ESPage(BasePage):
-    title = "Weight Decay & 조기종료"
-    slug = "regularization_weightdecay_earlystop"
-    icon = "⏳"
+class RegBNNoisePage(BasePage):
+    title = "규제 · 배치정규화 & 입력노이즈"
+    slug = "regularization_batchnorm_noise"
+    icon = "🧯"
     group = "models"
     section = "규제"
+    order = 30
 
     def render(self) -> None:
         inject_global_style()
-        st.title("⏳Weight Decay(AdamW) & 조기종료")
-        badges(["과적합 방지", "학습안정", "MLP"])
+        st.title("🧯 규제: 배치정규화(BN) & 입력 노이즈")
+        badges(["안정화", "일반화", "주의"])
 
-        st.markdown("### Weight Decay (AdamW)")
+        st.markdown("### 배치정규화 (BatchNorm)")
         card(
-            "- 가중치가 **너무 커지지 않게** 살짝 잡아당기는 규제.\n"
-            "- **AdamW**를 사용하면 학습률 스케줄과 잘 맞습니다.\n"
-            "- 값: 보통 **1e-5 ~ 1e-3** 범위에서 탐색.\n"
+            "- 층마다 분포를 **정돈**해 학습을 안정화합니다.\n"
+            "- MLP 블록에 BN을 넣으면 수렴이 **부드러워**집니다.\n"
         )
 
-        st.markdown("### 조기종료 (EarlyStopping)")
+        st.markdown("### 입력 노이즈")
         card(
-            "- 검증 성능이 n 에폭 동안 좋아지지 않으면 **멈춤**.\n"
-            "- 과적합을 막고, **시간도 절약**합니다.\n"
+            "- 입력에 작은 **가우시안 노이즈**를 더해 **과적합을 완화**하는 방법.\n"
+            "- 이번 데이터에서는 **효과가 제한적**이었습니다.\n"
         )
 
-        st.markdown("### 이번 프로젝트 메모")
+        st.markdown("### 팁")
         card(
-            "- MLP에서 **적당한 WD + 조기종료**가 안정적.\n"
-            "- 너무 큰 WD는 **언더핏** 위험 → 로그스케일 탐색 권장.\n"
+            "- BN은 드롭아웃과 **함께** 쓰되, 순서/강도를 조심\n"
+            "- 입력 노이즈는 **적게**(예: 0.01~0.05 표준편차) 시도\n"
         )
 
-PageRegistry.register(RegWD_ESPage)
+PageRegistry.register(RegBNNoisePage)
 

@@ -10,6 +10,7 @@ class RegularizationOverviewPage(BasePage):
     icon = "🛡️"
     group = "models"
     section = "규제"
+    order = 10
 
     def render(self) -> None:
         inject_global_style()

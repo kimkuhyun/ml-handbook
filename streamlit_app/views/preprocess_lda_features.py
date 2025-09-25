@@ -9,6 +9,7 @@ class PreprocLDAPage(BasePage):
     icon = "🎯"
     group = "models"
     section = "전처리"
+    order = 50
 
     def render(self) -> None:
         inject_global_style()

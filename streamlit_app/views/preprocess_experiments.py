@@ -29,6 +29,7 @@ class PreprocessExperimentsPage(BasePage):
     icon = "🧪"
     group = "models"
     section = "전처리"
+    order = 80
 
     @staticmethod
     def _decision_tree() -> pd.DataFrame:

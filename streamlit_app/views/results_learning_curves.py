@@ -17,6 +17,7 @@ class ResultsLearningCurvesPage(BasePage):
     icon = "📈"
     group = "results"
     section = "learning_curves"
+    order = 50
 
     @staticmethod
     def _lgbm_quickfix() -> pd.DataFrame:

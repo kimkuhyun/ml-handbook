@@ -9,6 +9,7 @@ class KNNPage(BasePage):
     icon = "👥"
     group = "models"
     section = "모델"
+    order = 90
 
     def render(self) -> None:
         inject_global_style()

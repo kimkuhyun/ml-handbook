@@ -9,6 +9,7 @@ class RegBaggingPage(BasePage):
     icon = "🧪"
     group = "models"
     section = "규제"
+    order = 40
 
     def render(self) -> None:
         inject_global_style()

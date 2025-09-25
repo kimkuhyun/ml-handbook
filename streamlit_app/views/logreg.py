@@ -9,6 +9,7 @@ class LogRegPage(BasePage):
     icon = "📈"
     group = "models"
     section = "모델"
+    order = 60
 
     def render(self) -> None:
         inject_global_style()

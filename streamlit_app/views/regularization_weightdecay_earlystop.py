@@ -9,6 +9,7 @@ class RegWD_ESPage(BasePage):
     icon = "⏳"
     group = "models"
     section = "규제"
+    order = 20
 
     def render(self) -> None:
         inject_global_style()

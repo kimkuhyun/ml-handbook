@@ -12,6 +12,7 @@ class PageMeta:
     icon: str
     group: str = "models"        # "home" | "eda" | "models"
     section: str = "모델"         # models 그룹일 때: "모델" | "전처리" | "규제"
+    order: int = 100
 
 class BasePage:
     # 서브클래스에서 오버라이드
@@ -20,11 +21,12 @@ class BasePage:
     icon: str = "📄"
     group: str = "models"     # 기본값: 모델 그룹
     section: str = "모델"      # 기본값: 모델 섹션
+    order: int = 100
 
     def meta(self) -> PageMeta:
         return PageMeta(
             title=self.title, slug=self.slug, icon=self.icon,
-            group=self.group, section=self.section
+            group=self.group, section=self.section, order=self.order
         )
 
     def render(self) -> None:
@@ -54,7 +56,7 @@ class PageRegistry:
         if section:
             pages = [p for p in pages if p.section == section]
         # 홈/EDA는 섹션 정렬 불필요, 모델 그룹은 제목순 정렬
-        return sorted(pages, key=lambda p: (p.group, p.section, p.title))
+        return sorted(pages, key=lambda p: (p.group, p.section, getattr(p, "order", 100), p.title))
 
 class App:
     def __init__(self, project_title: str, repo_name: str):
@@ -79,22 +81,31 @@ class App:
         elif top_group == "EDA":
             pages = PageRegistry.list_by(group="eda")
             # EDA는 페이지가 여러 개일 수 있으니 선택박스 제공
-            titles = [f"{p.icon} {p.title}" for p in pages]
-            idx = st.sidebar.selectbox("EDA 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
-            page_cls = pages[idx] if pages else None
+            if pages:
+                labels = [f"{p.icon} {p.title}" for p in pages]
+                choice = st.sidebar.radio("EDA 페이지", labels, index=0)
+                page_cls = pages[labels.index(choice)]
+            else:
+                page_cls = None
 
         elif top_group == "모델":  # "모델들"
             sub = st.sidebar.radio("분류", ["모델", "전처리", "규제"], index=0)
             pages = PageRegistry.list_by(group="models", section=sub)
-            titles = [f"{p.icon} {p.title}" for p in pages]
-            idx = st.sidebar.selectbox(f"{sub} 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
-            page_cls = pages[idx] if pages else None
+            if pages:
+                labels = [f"{p.icon} {p.title}" for p in pages]
+                choice = st.sidebar.radio(f"{sub} 페이지", labels, index=0)
+                page_cls = pages[labels.index(choice)]
+            else:
+                page_cls = None
 
         else:
-            pages = PageRegistry.list_by(group='results')
-            titles = [f"{p.icon} {p.title}" for p in pages]
-            idx = st.sidebar.selectbox("결과 페이지", list(range(len(pages))), format_func=lambda i: titles[i]) if pages else None
-            page_cls = pages[idx] if pages else None
+            pages = PageRegistry.list_by(group="results")
+            if pages:
+                labels = [f"{p.icon} {p.title}" for p in pages]
+                choice = st.sidebar.radio("결과 페이지", labels, index=0)
+                page_cls = pages[labels.index(choice)]
+            else:
+                page_cls = None
 
         if page_cls is None:
             st.warning("표시할 페이지가 없습니다. 파일 임포트/등록을 확인해주세요.")

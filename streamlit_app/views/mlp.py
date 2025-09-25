@@ -10,6 +10,7 @@ class MLPPage(BasePage):
     icon = "🧠"
     group = "models"
     section = "모델"
+    order = 30
 
     def render(self) -> None:
         inject_global_style()
@@ -62,6 +63,16 @@ class MLPPage(BasePage):
 - **Temperature scaling + 클래스별 bias**로 확률 보정(미세 상승)  
 - seed 배깅 확대, Cosine LR 스케줄로 안정성↑  
 - {0,9,15} 전용 **작은 보조 모델**(게이팅) 추가
+        """)
+
+        st.subheader("📚 참고: 실제 적용 논문")
+        card("""
+**MLP for Critical Infrastructure Anomaly Detection**
+
+- 데이터: 유량·압력 등 센서 시계열 → 정형 특징.
+- 모델: MLP + CUSUM.
+- 결과: F1 80~90%, 오탐 적음.
+- 의미: 단순 구조 + 통계 결합으로 실용성 높음.
         """)
 
 PageRegistry.register(MLPPage)
