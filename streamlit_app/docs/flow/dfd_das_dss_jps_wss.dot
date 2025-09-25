@@ -1,111 +1,18 @@
 digraph G {
   graph [rankdir=LR, fontsize=10, fontname="Pretendard"];
-  node  [shape=rect, style=filled, fillcolor="#f8f9fb", color="#d0d7de", fontname="Pretendard"];
-  edge  [color="#94a3b8"];
+  node  [shape=rect, style=rounded, color="#94a3b8", fontname="Pretendard"];
 
-  // ─────────────────────── DAS ───────────────────────
-  subgraph cluster_das {
-    label="DAS · Data Acquisition System";
-    color="#94a3b8"; style="rounded";
+  DAS  [label="DAS\n(수집·적재: train/test)"];
+  PRE  [label="전처리\n(IQR·표준화·FS)"];
+  MOD  [label="모델링\n(Stage-1·전문가·게이팅)"];
+  DSS  [label="DSS\n(후처리·캘리브레이션)"];
+  WSS  [label="WSS\n(Streamlit 시각화)"];
 
-    src_sensors   [label="현장 센서\n(온도·압력·진동·전류)"];
-    src_collect   [label="수집/적재\ntrain.csv · test.csv"];
-    src_storage   [label="원천 저장소\n(data/raw)"];
+  DAS -> PRE -> MOD -> DSS -> WSS;
 
-    src_sensors -> src_collect -> src_storage;
-  }
-
-  // ─────────────── 전처리 / 특성 엔지니어링 ───────────────
-  subgraph cluster_pre {
-    label="Preprocess / Feature Engineering";
-    color="#94a3b8"; style="rounded";
-
-    pre_iqr       [label="IQR 필터링"];
-    pre_std       [label="표준화\n(StandardScaler)"];
-    pre_corr      [label="상관 기반 프루닝\n(corr pruning)"];
-    pre_top30     [label="Feature Selection\n(TOP-30)"];
-    pre_lda       [label="LDA 축 생성"];
-    pre_ae        [label="AutoEncoder latent"];
-
-    src_storage -> pre_iqr -> pre_std -> pre_corr -> pre_top30;
-    pre_top30 -> pre_lda;
-    pre_top30 -> pre_ae;
-  }
-
-  // ───────────────────── 모델링 ─────────────────────
-  subgraph cluster_model {
-    label="Modeling / Inference";
-    color="#94a3b8"; style="rounded";
-
-    m_stage1   [label="Stage-1 Stacking\n(LGBM + XGB + MLP → LR 메타)"];
-    m_experts  [label="전문가(0/3/9/15)\nSupCon/Triplet/SVM"];
-    m_router   [label="2-Stage Router\n(게이팅 + 블렌딩)"];
-    m_artifacts[label="Artifacts\nmodel.pkl · prob.csv"];
-
-    pre_lda -> m_stage1;
-    pre_ae  -> m_stage1;
-    pre_top30 -> m_stage1;
-    pre_top30 -> m_experts;
-
-    m_stage1 -> m_router;
-    m_experts -> m_router;
-    m_router -> m_artifacts;
-  }
-
-  // ───────────────────── DSS ─────────────────────
-  subgraph cluster_dss {
-    label="DSS · Decision Support System";
-    color="#94a3b8"; style="rounded";
-
-    d_post     [label="후처리\n(Viterbi · Potts)"];
-    d_calib    [label="캘리브레이션/바이어스/임계치"];
-    d_outputs  [label="최종 추론 결과\npred.csv · submission.csv"];
-
-    m_artifacts -> d_post -> d_calib -> d_outputs;
-  }
-
-  // ───────────────────── JPS ─────────────────────
-  subgraph cluster_jps {
-    label="JPS · Job/Pipeline Scheduler";
-    color="#94a3b8"; style="rounded";
-
-    j_runner   [label="CV/OOF 러너 · 배치 스케줄"];
-    j_registry [label="모델/특성 버저닝\n(artifacts/)"];
-    j_submit   [label="제출 파일 생성\n(submission.csv)"];
-
-    {m_stage1 m_experts m_router} -> j_runner;
-    j_runner -> j_registry;
-    j_runner -> j_submit -> d_outputs;
-  }
-
-  // ───────────────────── WSS ─────────────────────
-  subgraph cluster_wss {
-    label="WSS · Web Serving (Streamlit)";
-    color="#94a3b8"; style="rounded";
-
-    w_eda      [label="EDA 페이지"];
-    w_models   [label="모델 · 전처리 · 규제 페이지"];
-    w_results  [label="결과(Overview/Stage/Stacking/Postprocess)"];
-    w_predict  [label="예측 분포(Predict Dist)"];
-    w_submit   [label="제출 기록(Results Submissions)"];
-
-    d_outputs -> w_results;
-    m_artifacts -> w_predict;
-    j_submit -> w_submit;
-    {pre_iqr pre_std pre_corr pre_top30 pre_lda pre_ae} -> w_models;
-    src_storage -> w_eda;
-  }
-
-  // ───────────────────── Legend ─────────────────────
-  subgraph cluster_legend {
-    label="Legend";
-    color="#e2e8f0"; style="dashed,rounded";
-    l1[label="DAS: 수집/적재", fillcolor="#ffffff"];
-    l2[label="Preprocess: 정제/특성", fillcolor="#ffffff"];
-    l3[label="Modeling: 학습/추론", fillcolor="#ffffff"];
-    l4[label="DSS: 후처리/의사결정", fillcolor="#ffffff"];
-    l5[label="JPS: 파이프라인/스케줄", fillcolor="#ffffff"];
-    l6[label="WSS: 웹 시각화", fillcolor="#ffffff"];
-  }
+  // JPS는 파이프라인/스케줄러로 학습·제출 트리거만 표시
+  JPS  [label="JPS\n(스케줄·실행·아티팩트)", shape=folder];
+  JPS -> MOD;
+  JPS -> DSS;
 }
 
