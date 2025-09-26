@@ -28,8 +28,8 @@ class ResultsOverviewPage(BasePage):
     slug = "results_overview"
     icon = "📊"
     group = "results"
-    section = "overview"
-    order = 10
+    section = "results"
+    order = 25 
 
     @staticmethod
     def _summary() -> pd.DataFrame:

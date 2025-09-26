@@ -17,7 +17,7 @@ class ResultsStackingVariantsPage(BasePage):
     slug = "results_stacking_variants"
     icon = "🧱"
     group = "results"
-    section = "stacking"
+    section = "results"
     order = 30
 
     @staticmethod

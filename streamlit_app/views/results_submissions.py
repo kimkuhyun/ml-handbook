@@ -13,7 +13,7 @@ class ResultsSubmissionsPage(BasePage):
     slug   = "results-submissions"
     icon   = "📈"
     group  = "results"
-    section = "결과"
+    section = "results"
     order = 60
 
     def _data(self) -> pd.DataFrame:

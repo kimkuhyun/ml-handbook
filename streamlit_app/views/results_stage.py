@@ -30,8 +30,8 @@ class ResultsStagePage(BasePage):
     slug = "results_stage"
     icon = "🧩"
     group = "results"
-    section = "stage"
-    order = 20
+    section = "results"
+    order = 30
 
     def _stage1(self) -> pd.DataFrame:
         return pd.DataFrame([{

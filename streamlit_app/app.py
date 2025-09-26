@@ -50,6 +50,7 @@ import streamlit_app.views.results_postprocess   # noqa: F401
 import streamlit_app.views.results_stacking_variants  # noqa: F401
 import streamlit_app.views.results_learning_curves    # noqa: F401
 import streamlit_app.views.results_submissions
+import streamlit_app.views.results_diagram
 
 import streamlit_app.views.predict_dist
 

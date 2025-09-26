@@ -4,7 +4,7 @@ from streamlit_app.core.base import BasePage, PageRegistry
 from streamlit_app.core.ui import inject_global_style, badges, card
 
 class CatBoostPage(BasePage):
-    title = "CatBoost (계획)"
+    title = "CatBoost"
     slug = "catboost"
     icon = "🐈"
     group = "models"
@@ -12,7 +12,7 @@ class CatBoostPage(BasePage):
 
     def render(self) -> None:
         inject_global_style()
-        st.title("🐈 CatBoost (계획)")
+        st.title("🐈 CatBoost")
         badges(["GBDT", "탭형 강자", "자동 상호작용", "기본값 강함"])
 
         st.markdown("### 이 모델은?")

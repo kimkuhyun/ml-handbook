@@ -130,7 +130,8 @@ class PredictDistPage(BasePage):
     slug = "predict-dist"
     icon = "📊"
     group = "results"
-    section = ""
+    section = "results"
+    order = 15 
 
     def render(self) -> None:
         inject_global_style()
