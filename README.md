@@ -63,7 +63,9 @@ flowchart LR
 
 ```bash
 # 의존성 (요약)
-pip install streamlit pandas numpy scikit-learn lightgbm xgboost catboost umap-learn
+pip install streamlit pandas numpy scikit-learn matplotlib seaborn \
+            lightgbm xgboost catboost umap-learn \
+            graphviz plotly scipy joblib
 
 # 실행
 streamlit run streamlit_app/app.py
